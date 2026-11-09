@@ -14,13 +14,13 @@ import {
 
 /*
  * "Mensaje a las 3 AM" — Parte 1
- * Historia interactiva para TikTok / Reels (1080x1920, 30 fps, 34 s).
- * Los tiempos de cada escena están sincronizados con scripts/banda_sonora.py.
+ * Historia interactiva para TikTok / Reels (1080x1920, 30 fps, 45 s), narrada por Edoardo (ElevenLabs).
+ * Los tiempos de cada escena están sincronizados con la voz y con scripts/banda_sonora.py.
  * Zona segura TikTok: el contenido importante queda entre y≈200 y y≈1480.
  */
 
 export const FPS = 30;
-export const DURACION = 34 * FPS;
+export const DURACION = 45 * FPS;
 const s = (seg: number) => Math.round(seg * FPS);
 
 const ROJO = '#ff2d55';
@@ -180,17 +180,17 @@ const Notificacion: React.FC<{at: number}> = ({at}) => {
 
 const Escena1Gancho: React.FC = () => {
   const frame = useCurrentFrame();
-  const golpe = s(1.6);
+  const golpe = s(2.8);
   const pulso = interpolate(frame, [golpe, golpe + 20], [0.9, 0.35], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   return (
     <AbsoluteFill style={{background: '#050507', transform: shake(frame, [golpe], 22)}}>
       <AbsoluteFill style={{background: `radial-gradient(circle at 50% 55%, rgba(255,45,85,${frame >= golpe ? pulso : 0.12}) 0%, transparent 60%)`}} />
       <Etiqueta>PARTE 1</Etiqueta>
       <Centro style={{gap: 10, paddingBottom: 60}}>
-        <Rise at={4} style={{fontSize: 78, fontWeight: 700}}>Si te llega este mensaje</Rise>
-        <Rise at={20} style={{fontSize: 78, fontWeight: 700, color: '#c9c9d6'}}>a las <span style={{color: 'white'}}>3 AM</span>…</Rise>
-        <Slam at={golpe} style={{fontSize: 138, fontWeight: 900, marginTop: 30, letterSpacing: -4, textShadow: `0 0 60px ${ROJO}`}}>
-          ¿QUÉ HACÉS?
+        <Rise at={s(0.15)} style={{fontSize: 78, fontWeight: 700}}>Si te llega este mensaje</Rise>
+        <Rise at={s(1.45)} style={{fontSize: 78, fontWeight: 700, color: '#c9c9d6'}}>a las <span style={{color: 'white'}}>3 AM</span>…</Rise>
+        <Slam at={golpe} style={{fontSize: 126, fontWeight: 900, marginTop: 30, letterSpacing: -4, textShadow: `0 0 60px ${ROJO}`}}>
+          ¿QUÉ HARÍAS?
         </Slam>
       </Centro>
       <AbsoluteFill style={{background: 'white', opacity: flash(frame, [golpe])}} />
@@ -202,7 +202,7 @@ const Escena2Reloj: React.FC = () => {
   const frame = useCurrentFrame();
   const parpadeo = random(`f${Math.floor(frame / 3)}`) > 0.9 ? 0.35 : 1;
   const dosPuntos = Math.floor(frame / 15) % 2 === 0 ? 1 : 0.15;
-  const zoom = interpolate(frame, [0, s(3.5)], [1, 1.1]);
+  const zoom = interpolate(frame, [0, s(4.9)], [1, 1.1]);
   return (
     <AbsoluteFill style={{background: '#030304'}}>
       <Centro style={{transform: `scale(${zoom})`, paddingBottom: 120}}>
@@ -210,8 +210,8 @@ const Escena2Reloj: React.FC = () => {
           3<span style={{opacity: dosPuntos}}>:</span>07
           <span style={{fontSize: 90, marginLeft: 20, letterSpacing: 0}}>AM</span>
         </div>
-        <Rise at={18} style={{fontSize: 66, fontWeight: 700, marginTop: 70}}>No podés dormir.</Rise>
-        <Rise at={50} style={{fontSize: 66, fontWeight: 700, color: '#8d8d9c', marginTop: 16}}>Todo está en silencio.</Rise>
+        <Rise at={s(2.0)} style={{fontSize: 66, fontWeight: 700, marginTop: 70}}>No puedo dormir.</Rise>
+        <Rise at={s(3.4)} style={{fontSize: 66, fontWeight: 700, color: '#8d8d9c', marginTop: 16}}>Todo está en silencio.</Rise>
       </Centro>
     </AbsoluteFill>
   );
@@ -220,8 +220,8 @@ const Escena2Reloj: React.FC = () => {
 const Escena3Notificacion: React.FC = () => {
   const frame = useCurrentFrame();
   const entra = usePop(0, 15, 110);
-  const notif = s(1.0);
-  const zoomAt = s(3.0);
+  const notif = s(1.35);
+  const zoomAt = s(3.8);
   const z = interpolate(frame, [zoomAt, zoomAt + 25], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.inOut(Easing.cubic)});
   const vibra = frame >= notif && frame < notif + 12 ? Math.sin(frame * 3) * 10 : 0;
   return (
@@ -243,7 +243,7 @@ const Escena3Notificacion: React.FC = () => {
         <div style={{position: 'absolute', top: 1180, left: 0, right: 0, textAlign: 'center', fontFamily: DISPLAY, color: 'white'}}>
           <Rise at={4} style={{fontSize: 64, fontWeight: 700}}>El mensaje viene de</Rise>
           <Slam at={14} style={{display: 'inline-block', marginTop: 18, fontSize: 96, fontWeight: 900, background: ROJO, padding: '6px 28px', borderRadius: 18, transform: 'rotate(-2deg)'}}>
-            TU PROPIO NÚMERO
+            MI PROPIO NÚMERO
           </Slam>
         </div>
       </Sequence>
@@ -253,7 +253,7 @@ const Escena3Notificacion: React.FC = () => {
 
 const Escena4Golpes: React.FC = () => {
   const frame = useCurrentFrame();
-  const golpes = [s(0.5), s(1.1), s(1.7)];
+  const golpes = [s(0.4), s(1.0), s(1.6)];
   // luz por debajo de la puerta, con una sombra (pies) que se mueve
   const sombraX = interpolate(frame, [0, s(4)], [-220, 120]);
   return (
@@ -270,7 +270,7 @@ const Escena4Golpes: React.FC = () => {
         <div style={{position: 'absolute', left: `calc(50% + ${sombraX + 140}px)`, width: 90, top: 0, bottom: 0, background: '#000'}} />
       </div>
       <div style={{position: 'absolute', top: 1180, left: 0, right: 0, textAlign: 'center', fontFamily: DISPLAY, color: '#d8d8e2'}}>
-        <Rise at={s(2.7)} style={{fontSize: 62, fontWeight: 700}}>Alguien golpea tu puerta.</Rise>
+        <Rise at={s(2.6)} style={{fontSize: 62, fontWeight: 700}}>Alguien está golpeando.</Rise>
       </div>
       <AbsoluteFill style={{background: 'white', opacity: flash(frame, golpes)}} />
     </AbsoluteFill>
@@ -301,11 +301,11 @@ const Escribiendo: React.FC<{desde: number; hasta: number}> = ({desde, hasta}) =
 const Escena5Chat: React.FC = () => {
   const frame = useCurrentFrame();
   const entra = usePop(0, 16, 120);
-  const typingDesde = s(0.5);
-  const msg2 = s(2.0);
-  const oscuro = s(4.0);
-  const voz = s(4.8);
-  const tuVoz = s(5.8);
+  const typingDesde = s(0.3);
+  const msg2 = s(1.7);
+  const oscuro = s(4.85);
+  const voz = s(6.8);
+  const tuVoz = s(9.25);
   const dim = interpolate(frame, [oscuro, oscuro + 12], [0, 0.96], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   const temblor = frame >= voz ? (random(`t${frame}`) - 0.5) * 6 : 0;
   return (
@@ -331,11 +331,11 @@ const Escena5Chat: React.FC = () => {
       <Centro style={{paddingBottom: 160}}>
         <Rise at={oscuro + 4} style={{fontSize: 56, fontWeight: 600, color: '#a5a5b3'}}>Desde la puerta, una voz:</Rise>
         <Rise at={voz} style={{fontFamily: SERIF, fontStyle: 'italic', fontSize: 104, marginTop: 40, transform: `translate(${temblor}px, ${-temblor}px)`}}>
-          “Abrí… soy yo.”
+          “Abre… soy yo.”
         </Rise>
         {frame >= tuVoz && (
           <Slam at={tuVoz} style={{marginTop: 70}}>
-            <Glitch style={{fontSize: 130, fontWeight: 900, letterSpacing: -3}}>Es TU voz.</Glitch>
+            <Glitch style={{fontSize: 130, fontWeight: 900, letterSpacing: -3}}>Es MI voz.</Glitch>
           </Slam>
         )}
       </Centro>
@@ -365,7 +365,7 @@ const Opcion: React.FC<{at: number; letra: string; texto: string; latido: number
 const Escena6Eleccion: React.FC = () => {
   const frame = useCurrentFrame();
   const titulo = s(0.2);
-  const latidoBase = s(1.8);
+  const latidoBase = s(4.0);
   const fase = Math.max(0, frame - latidoBase) / 21; // un latido cada 0.7 s, igual que el audio
   const pulsoA = frame > latidoBase ? 1 + 0.035 * Math.exp(-((fase % 2) * 21) / 4) : 1;
   const pulsoB = frame > latidoBase + 21 ? 1 + 0.035 * Math.exp(-(((fase + 1) % 2) * 21) / 4) : 1;
@@ -374,17 +374,17 @@ const Escena6Eleccion: React.FC = () => {
     <AbsoluteFill style={{background: '#070205', transform: shake(frame, [titulo], 24)}}>
       <AbsoluteFill style={{background: `radial-gradient(circle at 50% 40%, rgba(255,45,85,${fondo}) 0%, transparent 65%)`}} />
       <Centro style={{gap: 34, paddingBottom: 120}}>
-        <Slam at={titulo} style={{fontSize: 136, fontWeight: 900, letterSpacing: -4, marginBottom: 20, textShadow: `0 0 50px ${ROJO}`}}>¿QUÉ HACÉS?</Slam>
-        <Opcion at={s(1.0)} letra="A" texto="Abrís la puerta" latido={pulsoA} />
-        <Opcion at={s(1.5)} letra="B" texto="Le contestás al mensaje" latido={pulsoB} />
-        <Rise at={s(2.8)} style={{fontSize: 64, fontWeight: 800, marginTop: 36}}>
-          Comentá <span style={{color: ROJO}}>A</span> o <span style={{color: ROJO}}>B</span> 👇
+        <Slam at={titulo} style={{fontSize: 126, fontWeight: 900, letterSpacing: -4, marginBottom: 20, textShadow: `0 0 50px ${ROJO}`}}>¿QUÉ HARÍAS?</Slam>
+        <Opcion at={s(1.6)} letra="A" texto="Abres la puerta" latido={pulsoA} />
+        <Opcion at={s(3.65)} letra="B" texto="Le contestas al mensaje" latido={pulsoB} />
+        <Rise at={s(5.95)} style={{fontSize: 64, fontWeight: 800, marginTop: 36}}>
+          Comenta <span style={{color: ROJO}}>A</span> o <span style={{color: ROJO}}>B</span> 👇
         </Rise>
-        <Rise at={s(3.6)} style={{fontSize: 48, fontWeight: 600, color: '#c9c9d6'}}>
+        <Rise at={s(7.45)} style={{fontSize: 48, fontWeight: 600, color: '#c9c9d6'}}>
           Lo más votado decide la <b style={{color: 'white'}}>PARTE 2</b>
         </Rise>
-        <Rise at={s(6.7)} style={{fontSize: 40, fontWeight: 600, color: '#8d8d9c', marginTop: 10}}>
-          Seguime para no perderte el final
+        <Rise at={s(10.3)} style={{fontSize: 40, fontWeight: 600, color: '#8d8d9c', marginTop: 10}}>
+          Sígueme para no perderte el final
         </Rise>
       </Centro>
       <AbsoluteFill style={{background: 'white', opacity: flash(frame, [titulo])}} />
@@ -406,12 +406,12 @@ const Corte: React.FC = () => {
 // ---------- composición ----------
 
 const ESCENAS: [number, number, React.FC][] = [
-  [0, 3.0, Escena1Gancho],
-  [3.0, 6.5, Escena2Reloj],
-  [6.5, 12.5, Escena3Notificacion],
-  [12.5, 16.5, Escena4Golpes],
-  [16.5, 23.0, Escena5Chat],
-  [23.0, 34.0, Escena6Eleccion],
+  [0, 4.6, Escena1Gancho],
+  [4.6, 9.5, Escena2Reloj],
+  [9.5, 17.35, Escena3Notificacion],
+  [17.35, 21.6, Escena4Golpes],
+  [21.6, 31.9, Escena5Chat],
+  [31.9, 45.0, Escena6Eleccion],
 ];
 
 export const Historia: React.FC = () => (
@@ -421,12 +421,12 @@ export const Historia: React.FC = () => (
         <Comp />
       </Sequence>
     ))}
-    {[3.0, 6.5, 16.5].map((t) => (
+    {[4.6, 9.5, 21.6].map((t) => (
       <Sequence key={t} from={s(t) - 2} durationInFrames={10}>
         <Corte />
       </Sequence>
     ))}
     <Grano />
-    <Audio src={staticFile('banda-3am.wav')} />
+    <Audio src={staticFile('banda-3am-voz.wav')} />
   </AbsoluteFill>
 );

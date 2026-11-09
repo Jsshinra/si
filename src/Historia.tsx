@@ -1,4 +1,5 @@
 import React from 'react';
+import {Cam, CAMS, camara, Cuarto, EstadoChico, GloboCelular, GloboPuerta, Onomatopeya, transformCamara} from './Cuarto';
 import {
   AbsoluteFill,
   Audio,
@@ -136,46 +137,6 @@ const Etiqueta: React.FC<{children: React.ReactNode; at?: number}> = ({children,
   );
 };
 
-// ---------- celular ----------
-
-const Celular: React.FC<{children: React.ReactNode; style?: React.CSSProperties}> = ({children, style}) => (
-  <div
-    style={{
-      width: 760, height: 1480, borderRadius: 110, background: '#0b0b0f', padding: 22,
-      boxShadow: '0 0 0 4px #2a2a33, 0 60px 160px rgba(255,45,85,0.25)', position: 'relative', ...style,
-    }}
-  >
-    <div style={{width: '100%', height: '100%', borderRadius: 90, overflow: 'hidden', position: 'relative', background: 'linear-gradient(170deg,#1b1530 0%,#0a0a12 60%,#140812 100%)'}}>
-      <div style={{position: 'absolute', top: 26, left: '50%', marginLeft: -110, width: 220, height: 64, borderRadius: 40, background: '#000', zIndex: 5}} />
-      {children}
-    </div>
-  </div>
-);
-
-const Notificacion: React.FC<{at: number}> = ({at}) => {
-  const p = usePop(at, 13, 170);
-  return (
-    <div
-      style={{
-        position: 'absolute', top: 470, left: 30, right: 30, padding: '30px 34px', borderRadius: 44,
-        background: 'rgba(40,40,52,0.82)', backdropFilter: 'blur(20px)', fontFamily: DISPLAY, color: 'white',
-        transform: `translateY(${(1 - p) * -380}px) scale(${0.9 + p * 0.1})`, opacity: p,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-      }}
-    >
-      <div style={{display: 'flex', alignItems: 'center', gap: 20, fontSize: 30, color: '#b9b9c6'}}>
-        <div style={{width: 58, height: 58, borderRadius: 16, background: '#34c759', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34}}>💬</div>
-        <span style={{flex: 1, textAlign: 'left', fontWeight: 600, letterSpacing: 1}}>MENSAJES</span>
-        <span>ahora</span>
-      </div>
-      <div style={{textAlign: 'left', marginTop: 18, fontSize: 44, fontWeight: 800}}>
-        Yo <span style={{fontSize: 30, fontWeight: 500, color: ROJO}}>· tu número</span>
-      </div>
-      <div style={{textAlign: 'left', marginTop: 8, fontSize: 46, fontWeight: 500}}>No abras la puerta.</div>
-    </div>
-  );
-};
-
 // ---------- escenas ----------
 
 const Escena1Gancho: React.FC = () => {
@@ -198,147 +159,136 @@ const Escena1Gancho: React.FC = () => {
   );
 };
 
-const Escena2Reloj: React.FC = () => {
+/*
+ * Escena continua del cuarto (4.6 s → 31.9 s). Todo se programa en segundos ABSOLUTOS
+ * del video, que coinciden con la narración.
+ */
+const T0 = 4.6;
+const GOLPES = [17.75, 18.35, 18.95];
+
+const CAM_KEYS: [number, Cam][] = [
+  [4.6, CAMS.reloj],
+  [5.9, CAMS.reloj],
+  [6.7, CAMS.general],
+  [9.5, {...CAMS.general, s: 1.06}],
+  [10.5, CAMS.mesita],
+  [11.25, CAMS.mesita],
+  [11.9, CAMS.lectura],
+  [13.3, CAMS.lectura],
+  [13.8, {...CAMS.lectura, s: 1.72}],
+  [17.4, {...CAMS.lectura, s: 1.72}],
+  [17.7, CAMS.puerta],
+  [19.6, {...CAMS.puerta, s: 1.5}],
+  [20.1, CAMS.general],
+  [21.6, CAMS.general],
+  [22.2, CAMS.lectura],
+  [26.3, CAMS.lectura],
+  [26.9, CAMS.puerta],
+  [30.7, {...CAMS.puerta, s: 1.55}],
+  [30.85, CAMS.cara],
+  [31.9, {...CAMS.cara, s: 2.1}],
+];
+
+/** Subtítulo fijo arriba de la pantalla, visible entre dos segundos absolutos */
+const Texto: React.FC<{desde: number; hasta: number; children: React.ReactNode}> = ({desde, hasta, children}) => {
   const frame = useCurrentFrame();
-  const parpadeo = random(`f${Math.floor(frame / 3)}`) > 0.9 ? 0.35 : 1;
-  const dosPuntos = Math.floor(frame / 15) % 2 === 0 ? 1 : 0.15;
-  const zoom = interpolate(frame, [0, s(4.9)], [1, 1.1]);
-  return (
-    <AbsoluteFill style={{background: '#030304'}}>
-      <Centro style={{transform: `scale(${zoom})`, paddingBottom: 120}}>
-        <div style={{fontFamily: MONO, fontWeight: 800, fontSize: 290, color: ROJO, opacity: parpadeo, textShadow: `0 0 40px ${ROJO}, 0 0 120px ${ROJO}`, letterSpacing: -10}}>
-          3<span style={{opacity: dosPuntos}}>:</span>07
-          <span style={{fontSize: 90, marginLeft: 20, letterSpacing: 0}}>AM</span>
-        </div>
-        <Rise at={s(2.0)} style={{fontSize: 66, fontWeight: 700, marginTop: 70}}>No puedo dormir.</Rise>
-        <Rise at={s(3.4)} style={{fontSize: 66, fontWeight: 700, color: '#8d8d9c', marginTop: 16}}>Todo está en silencio.</Rise>
-      </Centro>
-    </AbsoluteFill>
-  );
+  const t = T0 + frame / FPS;
+  if (t < desde || t > hasta) return null;
+  const salida = interpolate(t, [hasta - 0.15, hasta], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  return <div style={{opacity: salida}}>{children}</div>;
 };
 
-const Escena3Notificacion: React.FC = () => {
+const EscenaCuarto: React.FC = () => {
   const frame = useCurrentFrame();
-  const entra = usePop(0, 15, 110);
-  const notif = s(1.35);
-  const zoomAt = s(3.8);
-  const z = interpolate(frame, [zoomAt, zoomAt + 25], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.inOut(Easing.cubic)});
-  const vibra = frame >= notif && frame < notif + 12 ? Math.sin(frame * 3) * 10 : 0;
+  const {fps} = useVideoConfig();
+  const t = T0 + frame / fps;
+  const f = (seg: number) => s(seg - T0);
+
+  const estado: EstadoChico = t < 11.3 ? 'despierto' : t < 17.75 ? 'leyendo' : t < 21.6 ? 'asustado' : t < 26.45 ? 'leyendo' : 'asustado';
+  const enMano = interpolate(t, [11.25, 11.75], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.inOut(Easing.cubic)});
+  const brillo = t < 10.8 ? 0 : interpolate(t, [10.8, 11.0, 26.45, 27], [0, 1, 0.9, 0.35], {extrapolateRight: 'clamp'});
+  const vibra = t >= 10.8 && t < 11.25 ? 16 : 0;
+
+  let puertaShake = 0;
+  let destello = 0;
+  let rayos = 1;
+  for (const g of GOLPES) {
+    const d = t - g;
+    if (d < 0 || d > 0.5) continue;
+    puertaShake += 16 * Math.exp(-d / 0.08) * Math.sin(d * 70);
+    const fl = interpolate(d, [0, 0.35], [1, 0], {extrapolateRight: 'clamp'});
+    if (fl > destello) {
+      destello = fl;
+      rayos = 1 + d * 0.8;
+    }
+  }
+  const parpadeoLuz = random(`l${Math.floor(frame / 4)}`) > 0.85 ? 0.6 : 1;
+  const luzPuerta = (t < 17.35 ? 0.35 : 0.85) * parpadeoLuz;
+  const sombra = t < 26.45 ? interpolate(t, [17.35, 21.6], [-160, 80], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}) : interpolate(t, [26.45, 31.9], [80, -20]);
+  const oscuro = interpolate(t, [26.45, 27.1], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+
+  const cam = camara(t, CAM_KEYS);
+  const glitch = t >= 30.85;
+  const gx = glitch ? (random(`gx${frame}`) - 0.5) * 24 : 0;
+  const golpesF = GOLPES.map(f);
+
   return (
-    <AbsoluteFill style={{background: '#050507'}}>
-      <Centro>
-        <div style={{transform: `translateY(${(1 - entra) * 900 - z * 170}px) scale(${1 + z * 0.45}) rotate(${vibra * 0.2}deg) translateX(${vibra}px)`}}>
-          <Celular>
-            <div style={{position: 'absolute', top: 150, width: '100%', textAlign: 'center', color: 'white', fontFamily: DISPLAY}}>
-              <div style={{fontSize: 34, fontWeight: 600, color: '#c9c9d6'}}>lunes 9 de noviembre</div>
-              <div style={{fontSize: 190, fontWeight: 700, letterSpacing: -6, lineHeight: 1}}>3:07</div>
-            </div>
-            <Notificacion at={notif} />
-          </Celular>
-        </div>
-      </Centro>
-      <AbsoluteFill style={{background: 'white', opacity: flash(frame, [zoomAt]) * 0.4}} />
-      <Sequence from={zoomAt}>
-        <AbsoluteFill style={{background: 'linear-gradient(transparent 55%, rgba(0,0,0,0.92) 72%)'}} />
-        <div style={{position: 'absolute', top: 1180, left: 0, right: 0, textAlign: 'center', fontFamily: DISPLAY, color: 'white'}}>
-          <Rise at={4} style={{fontSize: 64, fontWeight: 700}}>El mensaje viene de</Rise>
-          <Slam at={14} style={{display: 'inline-block', marginTop: 18, fontSize: 96, fontWeight: 900, background: ROJO, padding: '6px 28px', borderRadius: 18, transform: 'rotate(-2deg)'}}>
+    <AbsoluteFill style={{background: '#05060d', overflow: 'hidden'}}>
+      <div
+        style={{
+          position: 'absolute', width: 1080, height: 1920, transformOrigin: '0 0',
+          transform: `${shake(frame, golpesF, 20)} translateX(${gx}px) ${transformCamara(cam)}`,
+          filter: glitch && random(`gh${Math.floor(frame / 2)}`) > 0.5 ? 'hue-rotate(-30deg) saturate(1.6)' : undefined,
+        }}
+      >
+        <Cuarto
+          frame={frame} estado={estado} celularEnMano={enMano} brillo={brillo} vibra={vibra}
+          puertaShake={puertaShake} destello={destello} rayos={rayos} luzPuerta={luzPuerta} sombra={sombra} oscuro={oscuro}
+        />
+        <GloboCelular frame={frame} fps={fps} entra={f(12.16)} sale={f(17.5)} textoDesde={f(15.88)} resaltarDesde={f(13.3)} texto="No abras la puerta." />
+        <GloboCelular
+          frame={frame} fps={fps} entra={f(21.9)} sale={f(26.4)} textoDesde={f(23.3)}
+          texto={<>Lo que está del otro lado <b style={{color: ROJO}}>no es quien parece.</b></>}
+        />
+        <Onomatopeya frame={frame} fps={fps} at={golpesF[0]} hasta={f(20.0)} x={680} y={700} rot={-12} />
+        <Onomatopeya frame={frame} fps={fps} at={golpesF[1]} hasta={f(20.0)} x={900} y={840} rot={10} />
+        <Onomatopeya frame={frame} fps={fps} at={golpesF[2]} hasta={f(20.0)} x={700} y={1080} rot={-6} />
+        <GloboPuerta frame={frame} fps={fps} entra={f(28.4)}>“Abre… soy yo.”</GloboPuerta>
+      </div>
+
+      <AbsoluteFill style={{background: 'white', opacity: flash(frame, golpesF) * 0.45}} />
+
+      {/* subtítulos arriba (zona segura de TikTok) */}
+      <AbsoluteFill style={{background: 'linear-gradient(rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.35) 22%, transparent 32%)', pointerEvents: 'none'}} />
+      <div style={{position: 'absolute', top: 240, left: 60, right: 60, textAlign: 'center', fontFamily: DISPLAY, color: 'white'}}>
+        <Texto desde={4.6} hasta={6.5}>
+          <Rise at={f(4.75)} style={{fontSize: 60, fontWeight: 700, color: '#c9c9d6'}}>Son las 3:07 AM.</Rise>
+        </Texto>
+        <Texto desde={6.6} hasta={9.45}>
+          <Rise at={f(6.6)} style={{fontSize: 64, fontWeight: 800}}>No puedo dormir.</Rise>
+          <Rise at={f(8.0)} style={{fontSize: 56, fontWeight: 700, color: '#a5a5b3', marginTop: 10}}>Todo está en silencio.</Rise>
+        </Texto>
+        <Texto desde={10.75} hasta={13.2}>
+          <Rise at={f(10.75)} style={{fontSize: 64, fontWeight: 800}}>*bzzz* *bzzz*</Rise>
+        </Texto>
+        <Texto desde={13.3} hasta={17.3}>
+          <Rise at={f(13.3)} style={{fontSize: 58, fontWeight: 700}}>El mensaje viene de</Rise>
+          <Slam at={f(13.6)} style={{display: 'inline-block', marginTop: 14, fontSize: 84, fontWeight: 900, background: ROJO, padding: '4px 26px', borderRadius: 16, transform: 'rotate(-2deg)'}}>
             MI PROPIO NÚMERO
           </Slam>
-        </div>
-      </Sequence>
-    </AbsoluteFill>
-  );
-};
-
-const Escena4Golpes: React.FC = () => {
-  const frame = useCurrentFrame();
-  const golpes = [s(0.4), s(1.0), s(1.6)];
-  // luz por debajo de la puerta, con una sombra (pies) que se mueve
-  const sombraX = interpolate(frame, [0, s(4)], [-220, 120]);
-  return (
-    <AbsoluteFill style={{background: '#000', transform: shake(frame, golpes, 34)}}>
-      <Centro style={{paddingBottom: 260, gap: 0}}>
-        {golpes.map((g, i) => (
-          <Slam key={g} at={g} style={{fontSize: 210, fontWeight: 900, lineHeight: 1.05, letterSpacing: -6, color: i === 2 ? ROJO : 'white', marginLeft: (i - 1) * 140}}>
-            TOC.
+        </Texto>
+        <Texto desde={19.96} hasta={21.55}>
+          <Rise at={f(19.96)} style={{fontSize: 64, fontWeight: 800}}>Alguien está golpeando.</Rise>
+        </Texto>
+        <Texto desde={26.45} hasta={28.35}>
+          <Rise at={f(26.5)} style={{fontSize: 58, fontWeight: 700, color: '#d8d8e2'}}>Desde la puerta, una voz:</Rise>
+        </Texto>
+        <Texto desde={30.85} hasta={31.9}>
+          <Slam at={f(30.85)}>
+            <Glitch style={{fontSize: 124, fontWeight: 900, letterSpacing: -3}}>Es MI voz.</Glitch>
           </Slam>
-        ))}
-      </Centro>
-      <div style={{position: 'absolute', top: 1360, left: 140, right: 140, height: 10, borderRadius: 10, background: '#ffd9a0', boxShadow: '0 0 40px 14px rgba(255,190,110,0.55)', overflow: 'hidden'}}>
-        <div style={{position: 'absolute', left: `calc(50% + ${sombraX}px)`, width: 90, top: 0, bottom: 0, background: '#000'}} />
-        <div style={{position: 'absolute', left: `calc(50% + ${sombraX + 140}px)`, width: 90, top: 0, bottom: 0, background: '#000'}} />
+        </Texto>
       </div>
-      <div style={{position: 'absolute', top: 1180, left: 0, right: 0, textAlign: 'center', fontFamily: DISPLAY, color: '#d8d8e2'}}>
-        <Rise at={s(2.6)} style={{fontSize: 62, fontWeight: 700}}>Alguien está golpeando.</Rise>
-      </div>
-      <AbsoluteFill style={{background: 'white', opacity: flash(frame, golpes)}} />
-    </AbsoluteFill>
-  );
-};
-
-const Burbuja: React.FC<{at: number; children: React.ReactNode}> = ({at, children}) => {
-  const p = usePop(at, 12, 180);
-  return (
-    <div style={{alignSelf: 'flex-start', maxWidth: 560, background: '#2c2c36', color: 'white', fontSize: 46, fontWeight: 500, padding: '24px 32px', borderRadius: 40, borderBottomLeftRadius: 10, textAlign: 'left', transform: `scale(${p})`, transformOrigin: 'bottom left', opacity: p}}>
-      {children}
-    </div>
-  );
-};
-
-const Escribiendo: React.FC<{desde: number; hasta: number}> = ({desde, hasta}) => {
-  const frame = useCurrentFrame();
-  if (frame < desde || frame >= hasta) return null;
-  return (
-    <div style={{alignSelf: 'flex-start', background: '#2c2c36', padding: '28px 34px', borderRadius: 40, display: 'flex', gap: 14}}>
-      {[0, 1, 2].map((i) => (
-        <div key={i} style={{width: 20, height: 20, borderRadius: 20, background: '#9a9aa8', transform: `translateY(${Math.sin((frame - i * 4) / 3) * 7}px)`}} />
-      ))}
-    </div>
-  );
-};
-
-const Escena5Chat: React.FC = () => {
-  const frame = useCurrentFrame();
-  const entra = usePop(0, 16, 120);
-  const typingDesde = s(0.3);
-  const msg2 = s(1.7);
-  const oscuro = s(4.85);
-  const voz = s(6.8);
-  const tuVoz = s(9.25);
-  const dim = interpolate(frame, [oscuro, oscuro + 12], [0, 0.96], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const temblor = frame >= voz ? (random(`t${frame}`) - 0.5) * 6 : 0;
-  return (
-    <AbsoluteFill style={{background: '#050507'}}>
-      <Centro>
-        <div style={{transform: `translateY(${(1 - entra) * 120}px) scale(${0.96 + entra * 0.04})`, opacity: entra}}>
-          <Celular>
-            <div style={{position: 'absolute', top: 0, left: 0, right: 0, paddingTop: 120, paddingBottom: 26, background: 'rgba(30,30,40,0.9)', textAlign: 'center', fontFamily: DISPLAY, color: 'white'}}>
-              <div style={{width: 96, height: 96, borderRadius: 96, background: ROJO, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 50, fontWeight: 800}}>Y</div>
-              <div style={{fontSize: 40, fontWeight: 700, marginTop: 12}}>Yo</div>
-              <div style={{fontSize: 28, color: ROJO}}>tu número</div>
-            </div>
-            <div style={{position: 'absolute', top: 420, left: 36, right: 36, display: 'flex', flexDirection: 'column', gap: 22, fontFamily: DISPLAY}}>
-              <div style={{fontSize: 26, color: '#777785', textAlign: 'center'}}>Hoy 3:07</div>
-              <Burbuja at={-30}>No abras la puerta.</Burbuja>
-              <Escribiendo desde={typingDesde} hasta={msg2} />
-              {frame >= msg2 && <Burbuja at={msg2}>Lo que está del otro lado <b style={{color: ROJO}}>no es quien parece.</b></Burbuja>}
-            </div>
-          </Celular>
-        </div>
-      </Centro>
-      <AbsoluteFill style={{background: '#000', opacity: dim, backdropFilter: `blur(${dim * 14}px)`}} />
-      <Centro style={{paddingBottom: 160}}>
-        <Rise at={oscuro + 4} style={{fontSize: 56, fontWeight: 600, color: '#a5a5b3'}}>Desde la puerta, una voz:</Rise>
-        <Rise at={voz} style={{fontFamily: SERIF, fontStyle: 'italic', fontSize: 104, marginTop: 40, transform: `translate(${temblor}px, ${-temblor}px)`}}>
-          “Abre… soy yo.”
-        </Rise>
-        {frame >= tuVoz && (
-          <Slam at={tuVoz} style={{marginTop: 70}}>
-            <Glitch style={{fontSize: 130, fontWeight: 900, letterSpacing: -3}}>Es MI voz.</Glitch>
-          </Slam>
-        )}
-      </Centro>
     </AbsoluteFill>
   );
 };
@@ -407,10 +357,7 @@ const Corte: React.FC = () => {
 
 const ESCENAS: [number, number, React.FC][] = [
   [0, 4.6, Escena1Gancho],
-  [4.6, 9.5, Escena2Reloj],
-  [9.5, 17.35, Escena3Notificacion],
-  [17.35, 21.6, Escena4Golpes],
-  [21.6, 31.9, Escena5Chat],
+  [4.6, 31.9, EscenaCuarto],
   [31.9, 45.0, Escena6Eleccion],
 ];
 
@@ -421,7 +368,7 @@ export const Historia: React.FC = () => (
         <Comp />
       </Sequence>
     ))}
-    {[4.6, 9.5, 21.6].map((t) => (
+    {[4.6, 31.9].map((t) => (
       <Sequence key={t} from={s(t) - 2} durationInFrames={10}>
         <Corte />
       </Sequence>

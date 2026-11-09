@@ -101,6 +101,11 @@ def glitch(d=0.45):
         i += seg
     return np.round(out * 6) / 6
 
+def buzz(d=0.45):
+    t = t_arr(d)
+    am = (np.sin(2 * np.pi * 22 * t) > 0).astype(float)
+    return np.sign(np.sin(2 * np.pi * 160 * t)) * 0.35 * am * np.minimum(1, (d - t) * 30)
+
 def pop():
     t = t_arr(0.25)
     f = 300 + 900 * np.exp(-t * 40)
@@ -125,16 +130,19 @@ for s in np.arange(4.6, 9.5, 1.0):
     add(s, tick(), 0.45, pan=0.3)
 for s in np.arange(4.9, 17.2, 0.9):
     add(s, heartbeat(), 0.6)
-add(9.5, whoosh(0.7), 0.35)
-add(10.85, ping(), 0.7)
+add(10.8, buzz(), 0.6)
+add(12.16, ping(True), 0.6)
+add(15.88, pop(), 0.45)
+add(17.4, whoosh(0.5), 0.3)
 add(13.3, impact(1.6), 0.5)
 for s in (17.75, 18.35, 18.95):
     add(s, knock(), 1.0, pan=-0.15)
-add(21.6, whoosh(0.7, False), 0.3)
+add(21.9, pop(), 0.4)
 for s in np.arange(21.9, 23.25, 0.11):
     add(s + rng.uniform(-0.02, 0.02), type_click(), 0.55)
 add(23.3, ping(True), 0.6)
 add(26.45, riser(1.95), 0.35)
+add(26.6, whoosh(0.6, False), 0.25)
 add(28.4, impact(1.4), 0.35)
 add(30.85, glitch(), 0.45)
 add(32.1, impact(), 1.0)

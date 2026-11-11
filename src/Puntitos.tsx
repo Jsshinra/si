@@ -182,7 +182,7 @@ export const Puntitos: React.FC = () => {
         </div>
         <div style={{position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
           <Cap desde={T.apagarDesde} hasta={T.bloques[0] - 0.15} style={{fontSize: 66, fontWeight: 700, color: '#c9cdf0'}}>Si tenés 20…</Cap>
-          <Cap desde={T.apagarDesde + 1.6} hasta={T.bloques[0] - 0.15} style={{fontSize: 96, fontWeight: 900, letterSpacing: -3, marginTop: 6}}>estos ya pasaron.</Cap>
+          <Cap desde={T.apagarDesde + 1.84} hasta={T.bloques[0] - 0.15} style={{fontSize: 96, fontWeight: 900, letterSpacing: -3, marginTop: 6}}>estos ya pasaron.</Cap>
         </div>
         {BLOQUES.map((b, k) => (
           <div key={k} style={{position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
@@ -212,7 +212,7 @@ export const Puntitos: React.FC = () => {
         </div>
         <div style={{position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textShadow: '0 4px 30px rgba(0,0,0,0.55)'}}>
           <Cap desde={T.frase} hasta={T.cierre - 0.15} style={{fontSize: 70, fontWeight: 700, color: '#ffe9c7'}}>No perdiste el tiempo.</Cap>
-          <Cap desde={T.frase + 1.3} hasta={T.cierre - 0.15} golpe style={{fontSize: 104, fontWeight: 900, letterSpacing: -3, marginTop: 6}}>Estuviste viviendo.</Cap>
+          <Cap desde={T.frase2} hasta={T.cierre - 0.15} golpe style={{fontSize: 104, fontWeight: 900, letterSpacing: -3, marginTop: 6}}>Estuviste viviendo.</Cap>
         </div>
         <div style={{position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textShadow: '0 4px 30px rgba(0,0,0,0.55)'}}>
           <Cap desde={T.cierre} hasta={T.dur + 1} style={{fontSize: 50, fontWeight: 600, color: '#ffe9c7', lineHeight: 1.2}}>No te preocupes tanto por cuántos puntos te quedan…</Cap>
@@ -234,4 +234,4 @@ export const Puntitos: React.FC = () => {
   );
 };
 
-const T_AUDIO = 'puntitos-musica.wav';
+const T_AUDIO = 'puntitos-mezcla.wav';

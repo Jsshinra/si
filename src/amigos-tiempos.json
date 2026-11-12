@@ -1,0 +1,23 @@
+{
+  "dur": 50,
+  "gancho": 0.2,
+  "gancho2": 2.4,
+  "h50a": 5.0, "h50b": 7.4,
+  "h90a": 8.6, "h90b": 10.2,
+  "trabajo": 11.6,
+  "gustavo": 13.6,
+  "perro": 16.0,
+  "otras": 18.0,
+  "mates": 19.2, "viajes": 20.2, "charlas": 21.2,
+  "h200q": 23.6,
+  "h200a": 25.2, "h200b": 26.8,
+  "giro": 29.0,
+  "noSosVos": 31.5,
+  "faltan": 32.8,
+  "amigo": 35.0,
+  "gasto": 37.5,
+  "enVos": 40.0,
+  "cierre": 42.5,
+  "mas": 44.0,
+  "cta": 45.5
+}

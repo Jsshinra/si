@@ -126,7 +126,7 @@ for th, m in ((T["h50b"], 84), (T["h90b"], 88)):
     add(sfx, th, blip(m, 0.4), 0.5)
     add(sfx, th + 0.1, blip(m + 7, 0.5), 0.5)
 # maletines que rebotan
-for j in range(10):
+for j in range(18):
     tl = T["trabajo"] + j * 0.45 + 0.5
     if tl < T["otras"] - 0.3:
         add(sfx, tl, boing(False), 0.3, pan=rng.uniform(-0.5, 0.5))

@@ -215,7 +215,7 @@ export const Amigos: React.FC = () => {
         <Bandera h={200} at={T.h200b} texto="+200 h" color={ROSA} oculta={Math.max(kVacio, paso(t, T.amigo, 0.4))} />
 
         {/* maletines: las horas de trabajo rebotan */}
-        {Array.from({length: 10}).map((_, k) => {
+        {Array.from({length: 18}).map((_, k) => {
           const t0 = T.trabajo + k * 0.45;
           const d = t - t0;
           if (d < 0 || d > 1.5 || t0 > T.otras - 0.8) return null;

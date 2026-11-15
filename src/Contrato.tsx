@@ -1,6 +1,8 @@
 import React from 'react';
 import {AbsoluteFill, Audio, Easing, interpolate, interpolateColors, random, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import T from './contrato-tiempos.json';
+import {Adentro, Afuera, Ascensor, ASC_X, CASA_X, MID, PISO} from './ContratoEscenario';
+import {Persona} from './Gente';
 
 /*
  * "El contrato" — el dilema de la serie Severance, contado con nuestros propios personajes.
@@ -22,11 +24,6 @@ const VERDE = '#12b886';
 const ROJO = '#e03131';
 const ORO = '#ffc400';
 
-const MID = 1000; // suelo de afuera
-const PISO = 1400; // suelo de adentro
-const ASC_X = 850; // centro del ascensor
-const CASA_X = 390; // donde se para cada uno en su mundo
-
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const paso = (t: number, desde: number, dur: number) => clamp01((t - desde) / dur);
 const suave = Easing.inOut(Easing.cubic);
@@ -34,11 +31,11 @@ const mezcla = (k: number, a: string, b: string) => (k <= 0 ? a : k >= 1 ? b : i
 
 /** Un viaje de ida y vuelta en ascensor. u va de 0 a 1. */
 const viaje = (u: number) => {
-  if (u <= 0 || u >= 1) return {x: CASA_X, lejos: 0, dentro: false, parpadeo: 0};
+  if (u <= 0 || u >= 1) return {x: CASA_X, lejos: 0, dentro: false, parpadeo: 0, camina: false, sentido: 0};
   const x = u < 0.28 ? interpolate(suave(u / 0.28), [0, 1], [CASA_X, ASC_X]) : u > 0.72 ? interpolate(suave((u - 0.72) / 0.28), [0, 1], [ASC_X, CASA_X]) : ASC_X;
   const lejos = u < 0.28 ? 0 : u < 0.45 ? suave((u - 0.28) / 0.17) : u < 0.55 ? 1 : u < 0.72 ? 1 - suave((u - 0.55) / 0.17) : 0;
   const parpadeo = u > 0.43 && u < 0.57 ? Math.sin(((u - 0.43) / 0.14) * Math.PI) : 0;
-  return {x, lejos, dentro: u >= 0.28 && u <= 0.72, parpadeo};
+  return {x, lejos, dentro: u >= 0.28 && u <= 0.72, parpadeo, camina: u < 0.28 || u > 0.72, sentido: u > 0.72 ? -1 : 1};
 };
 
 const CICLOS = [3.0, 1.4, 0.9];
@@ -54,31 +51,6 @@ const VUELTA = Math.min(0.7, (T.leccion - R0 - 0.2) / 3);
 const R1 = R0 + VUELTA;
 const R2 = R1 + VUELTA;
 const R3 = R2 + VUELTA;
-
-const Persona: React.FC<{x: number; y: number; color: string; mira: number; animo: number; escala?: number; tiembla?: boolean}> = ({x, y, color, mira, animo, escala = 1.12, tiembla}) => {
-  const frame = useCurrentFrame();
-  const parpado = (frame + Math.round(x)) % 90 < 4;
-  const respira = Math.sin(frame / 14 + x) * 3;
-  const tx = tiembla ? (random(`tp${frame}`) - 0.5) * 5 : 0;
-  return (
-    <div style={{position: 'absolute', left: x - 90 + tx, top: y - 230, width: 180, height: 240, transform: `scale(${escala})`, transformOrigin: '90px 230px'}}>
-      <svg width={180} height={240} viewBox="0 0 180 240" style={{overflow: 'visible'}}>
-        <rect x={58} y={196} width={22} height={36} rx={10} fill={TINTA} />
-        <rect x={100} y={196} width={22} height={36} rx={10} fill={TINTA} />
-        <rect x={28} y={60 - respira} width={124} height={150 + respira} rx={58} fill={color} stroke="white" strokeWidth={7} />
-        <path d={`M30 ${130 - respira} q-26 ${10 - Math.max(0, animo) * 50} -30 ${34 - Math.max(0, animo) * 80}`} stroke={color} strokeWidth={18} strokeLinecap="round" fill="none" />
-        <path d={`M150 ${130 - respira} q26 ${10 - Math.max(0, animo) * 50} 30 ${34 - Math.max(0, animo) * 80}`} stroke={color} strokeWidth={18} strokeLinecap="round" fill="none" />
-        {[70, 110].map((ex) => (
-          <g key={ex}>
-            <ellipse cx={ex} cy={112 - respira} rx={15} ry={parpado ? 2 : 17} fill="white" />
-            {!parpado && <circle cx={ex + mira * 6} cy={114 - respira + (animo < 0 ? 4 : 0)} r={7.5} fill={TINTA} />}
-          </g>
-        ))}
-        <path d={`M72 ${152 - respira} Q90 ${152 - respira + 4 + animo * 20} 108 ${152 - respira}`} stroke={TINTA} strokeWidth={6} strokeLinecap="round" fill={animo > 0.6 ? TINTA : 'none'} />
-      </svg>
-    </div>
-  );
-};
 
 /** Bloque de texto visible entre dos segundos */
 const Cap: React.FC<{desde: number; hasta: number; children: React.ReactNode; style?: React.CSSProperties; golpe?: boolean}> = ({desde, hasta, children, style, golpe}) => {
@@ -174,7 +146,7 @@ export const Contrato: React.FC = () => {
   if (t >= P2) papel = {x: interpolate(suave(paso(t, P2, TRAMO)), [0, 1], [ASC_X, CASA_X + 90]), y: MID - 150};
   if (t >= R0) papel = {x: interpolate(suave(paso(t, R0, VUELTA)), [0, 1], [CASA_X + 90, ASC_X]), y: MID - 150};
   if (t >= R1) papel = {x: ASC_X, y: cabY + 90};
-  if (t >= R2) papel = {x: interpolate(suave(paso(t, R2, VUELTA)), [0, 1], [ASC_X, CASA_X + 70]), y: PISO - 150 + 60 * suave(paso(t, R2, VUELTA))};
+  if (t >= R2) papel = {x: interpolate(suave(paso(t, R2, VUELTA)), [0, 1], [ASC_X, CASA_X + 150]), y: PISO - 150 + 96 * suave(paso(t, R2, VUELTA))};
   const sellado = t >= T.no;
 
   // ánimo
@@ -192,54 +164,10 @@ export const Contrato: React.FC = () => {
 
   return (
     <AbsoluteFill style={{background: '#fff4e3', fontFamily: DISPLAY, color: tinta}}>
-      {/* ============ AFUERA ============ */}
-      <div style={{position: 'absolute', left: 0, right: 0, top: 0, height: MID, overflow: 'hidden', background: 'linear-gradient(180deg, #ffe9d6 0%, #ffd7e4 55%, #ffe6a8 100%)'}}>
-        {[{c: '#ffc2d9', x: 180, y: 300, r: 480}, {c: '#bfd4ff', x: 900, y: 520, r: 520}, {c: '#ffe39a', x: 420, y: 900, r: 460}].map((m, k) => (
-          <div key={k} style={{position: 'absolute', width: m.r * 2, height: m.r * 2, borderRadius: '50%', left: m.x - m.r + Math.sin(t * 0.2 + k) * 80, top: m.y - m.r + Math.cos(t * 0.24 + k * 2) * 80, background: `radial-gradient(circle, ${m.c} 0%, ${m.c}00 68%)`}} />
-        ))}
-        {/* sol */}
-        <div style={{position: 'absolute', left: 560, top: 590, width: 120, height: 120, borderRadius: 120, background: ORO, border: '7px solid white', boxShadow: `0 0 70px 18px ${ORO}88`, transform: `scale(${1 + 0.04 * Math.sin(t * 2)})`}} />
-        {/* casa */}
-        <svg width={260} height={280} style={{position: 'absolute', left: 30, top: MID - 262}}>
-          <rect x={30} y={120} width={190} height={150} rx={10} fill="white" stroke={TINTA} strokeWidth={7} />
-          <path d="M10 130 L125 28 L240 130 Z" fill={ROSA} stroke={TINTA} strokeWidth={7} strokeLinejoin="round" />
-          <rect x={100} y={180} width={50} height={90} rx={8} fill={TINTA} />
-          <rect x={164} y={160} width={36} height={36} rx={6} fill="#ffe39a" stroke={TINTA} strokeWidth={5} />
-        </svg>
-      </div>
-      {/* pasto */}
-      <div style={{position: 'absolute', left: 0, right: 0, top: MID - 14, height: 28, background: VERDE, borderRadius: 14}} />
-
-      {/* ============ ADENTRO ============ */}
-      <div style={{position: 'absolute', left: 0, right: 0, top: MID + 14, bottom: 0, overflow: 'hidden', background: '#d5ebe8', filter: `brightness(${luzOficina})`}}>
-        {/* tubos de luz */}
-        {[150, 480].map((x) => (
-          <div key={x} style={{position: 'absolute', left: x, top: 22, width: 230, height: 16, borderRadius: 16, background: 'white', boxShadow: '0 0 40px 12px rgba(255,255,255,0.9)'}} />
-        ))}
-        {/* pared con paneles */}
-        {[0, 1, 2, 3].map((k) => (
-          <div key={k} style={{position: 'absolute', left: k * 190 - 10, top: 70, width: 180, height: 300, border: '5px solid #bcd7d3', borderRadius: 10}} />
-        ))}
-        {/* piso */}
-        <div style={{position: 'absolute', left: 0, right: 0, top: PISO - MID - 14, bottom: 0, background: '#8fb1ad'}} />
-        <div style={{position: 'absolute', left: 0, right: 0, top: PISO - MID - 14, height: 10, background: '#6f948f'}} />
-        {/* escritorio */}
-        <svg width={300} height={240} style={{position: 'absolute', left: 30, top: PISO - MID - 14 - 226}}>
-          <rect x={70} y={40} width={150} height={104} rx={12} fill={TINTA} />
-          <rect x={82} y={52} width={126} height={80} rx={6} fill="#7dffb0" opacity={0.85 + 0.15 * Math.sin(t * 9)} />
-          {[0, 1, 2].map((k) => (
-            <rect key={k} x={94} y={66 + k * 20} width={60 + ((Math.floor(t * 4) + k * 37) % 40)} height={8} rx={4} fill="#0e1512" opacity={0.6} />
-          ))}
-          <rect x={134} y={144} width={22} height={20} fill={TINTA} />
-          <rect x={10} y={162} width={270} height={22} rx={8} fill={TINTA} />
-          <rect x={30} y={184} width={18} height={56} fill={TINTA} />
-          <rect x={242} y={184} width={18} height={56} fill={TINTA} />
-        </svg>
-      </div>
-
-      {/* ============ ASCENSOR ============ */}
-      <div style={{position: 'absolute', left: ASC_X - 92, top: 748, width: 184, height: PISO - 748, background: '#2b2766', borderRadius: 22, border: '6px solid white'}} />
-      <div style={{position: 'absolute', left: ASC_X - 78, top: cabY + 6, width: 156, height: 232, background: '#f3f0ff', borderRadius: 14, boxShadow: 'inset 0 0 0 6px #b9b3e6'}} />
+      <Afuera t={t} />
+      <div style={{position: 'absolute', left: 0, right: 0, top: MID - 14, height: 28, background: VERDE, borderRadius: 14, border: `4px solid ${TINTA}`, boxSizing: 'border-box'}} />
+      <Adentro t={t} luz={luzOficina} />
+      <Ascensor cabY={cabY} t={t} />
       {/* destello al cruzar la línea: ahí se divide la memoria */}
       {Math.abs(cab - 0.5) < 0.12 && (vA.dentro || vB.dentro) && <div style={{position: 'absolute', left: ASC_X - 130, top: MID - 40, width: 260, height: 80, borderRadius: 80, background: 'white', opacity: 1 - Math.abs(cab - 0.5) / 0.12, filter: 'blur(14px)'}} />}
 
@@ -247,13 +175,27 @@ export const Contrato: React.FC = () => {
       <Reloj x={ASC_X} y={672} hora={horaA} />
       <Reloj x={610} y={1100} hora={horaB} />
 
-      {/* personajes */}
-      {vA.dentro ? <Persona x={ASC_X} y={cabY + 236} color={cab < 0.5 ? ROSA : CELESTE} mira={0} animo={0.2} escala={0.95} /> : <Persona x={vA.x} y={MID} color={ROSA} mira={t >= T.aprobar && t < T.leccion ? 1 : vA.x > CASA_X + 5 ? 1 : 0.3} animo={animoA} />}
-      {vB.dentro ? <Persona x={ASC_X} y={cabY + 236} color={cab < 0.5 ? ROSA : CELESTE} mira={0} animo={-0.3} escala={0.95} /> : <Persona x={vB.x} y={PISO} color={CELESTE} mira={t >= T.renuncia ? 1 : vB.x > CASA_X + 5 ? 1 : -0.6} animo={animoB} tiembla={corriendo} />}
+      {/* personajes: la misma cara, distinta ropa */}
+      {vA.dentro ? (
+        <Persona x={ASC_X} y={cabY + 234} ropa={cab < 0.5 ? 'afuera' : 'adentro'} sentido={1} animo={0.2} escala={0.68} />
+      ) : (
+        <Persona
+          x={vA.x} y={MID} ropa="afuera" camina={vA.camina} sentido={vA.sentido || (t >= T.aprobar && t < T.leccion ? 1 : t >= T.leccion ? 1 : 1)}
+          animo={animoA} pose={animoA >= 1 ? 'festeja' : t >= P3 && t < R0 ? 'sostiene' : 'normal'}
+        />
+      )}
+      {vB.dentro ? (
+        <Persona x={ASC_X} y={cabY + 234} ropa={cab < 0.5 ? 'afuera' : 'adentro'} sentido={1} animo={-0.3} escala={0.68} />
+      ) : (
+        <Persona
+          x={vB.x} y={PISO} ropa="adentro" camina={vB.camina} sentido={vB.sentido || (t >= T.renuncia ? 1 : -1)}
+          animo={animoB} tiembla={corriendo} pose={t < T.renuncia && !vB.camina ? 'teclea' : t >= T.renuncia && t < T.renuncia + 0.3 ? 'sostiene' : 'normal'}
+        />
+      )}
 
       {/* chip */}
       {t >= T.chip && t < T.perfecto && (
-        <div style={{position: 'absolute', left: CASA_X - 44, top: MID - 380 + (1 - pop(T.chip, 8)) * -200, fontSize: 80, transform: `rotate(${Math.sin(t * 6) * 6}deg)`}}>
+        <div style={{position: 'absolute', left: CASA_X - 44, top: MID - 440 + (1 - pop(T.chip, 8)) * -200, fontSize: 80, transform: `rotate(${Math.sin(t * 6) * 6}deg)`}}>
           <div style={{width: 88, height: 88, borderRadius: 18, background: TINTA, border: '6px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 ${30 + 20 * Math.sin(t * 10)}px 6px ${CELESTE}`}}>
             <div style={{width: 40, height: 40, borderRadius: 8, background: CELESTE}} />
           </div>
@@ -274,7 +216,7 @@ export const Contrato: React.FC = () => {
 
       {/* mitades olvidadas */}
       <Oscuro top={MID + 14} alto={1920 - MID - 14} k={abajoOculto} />
-      <Oscuro top={0} alto={MID - 14} k={arribaOculto} />
+      <Oscuro top={0} alto={MID + 14} k={arribaOculto} />
       {abajoOculto > 0.5 && t >= T.entrar && <div style={{position: 'absolute', left: 0, right: 0, top: MID + 150, textAlign: 'center', fontSize: 44, fontWeight: 800, color: 'white', opacity: 0.55 * abajoOculto}}>lo que no vas a recordar</div>}
       {arribaOculto > 0.5 && <div style={{position: 'absolute', left: 0, width: 760, top: MID - 190, textAlign: 'center', fontSize: 44, fontWeight: 800, color: 'white', opacity: 0.55 * arribaOculto}}>lo que él nunca vio</div>}
 

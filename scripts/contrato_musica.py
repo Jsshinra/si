@@ -161,9 +161,9 @@ add(sfx, T["vos"], kick(), 0.8)
 for n in (57, 64, 69, 72):
     add(sfx, T["vos"], pluck(n, 3.0), 0.6)
 add(sfx, tit - 0.5, whoosh(0.8), 0.3)
-add(sfx, tit, kick(), 1.0)
+add(sfx, T["nombre"], kick(), 1.0)
 for n in (57, 64, 69, 76):
-    add(sfx, tit, pluck(n + 12, 3.0), 0.7)
+    add(sfx, T["nombre"], pluck(n + 12, 3.0), 0.7)
 add(sfx, T["pregunta"], blip(84, 0.2), 0.4)
 add(sfx, T["pregunta"] + 0.1, blip(91, 0.3), 0.4)
 

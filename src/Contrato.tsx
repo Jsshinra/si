@@ -46,8 +46,8 @@ const TRAMO = Math.min(0.8, (T.no - T.renuncia - 0.4) / 3);
 const P1 = T.renuncia + TRAMO;
 const P2 = P1 + TRAMO;
 const P3 = P2 + TRAMO;
-const R0 = T.no + 0.9;
-const VUELTA = Math.min(0.7, (T.leccion - R0 - 0.2) / 3);
+const R0 = T.no + 0.6;
+const VUELTA = Math.min(0.7, (T.otro - R0 - 0.2) / 3);
 const R1 = R0 + VUELTA;
 const R2 = R1 + VUELTA;
 const R3 = R2 + VUELTA;
@@ -321,11 +321,11 @@ export const Contrato: React.FC = () => {
       {t >= T.titulo && (
         <div style={{position: 'absolute', left: 0, right: 0, top: 560, textAlign: 'center', color: 'white'}}>
           <Cap desde={T.titulo} hasta={T.dur + 1} style={{fontSize: 54, fontWeight: 700, opacity: 0.8}}>Esta es la idea detrás de</Cap>
-          <Cap desde={T.titulo + 0.5} hasta={T.dur + 1} golpe style={{fontSize: 150, fontWeight: 900, letterSpacing: 4, lineHeight: 1.15}}>
+          <Cap desde={T.nombre} hasta={T.dur + 1} golpe style={{fontSize: 150, fontWeight: 900, letterSpacing: 4, lineHeight: 1.15}}>
             <span style={{color: ROSA}}>SEVE</span>
             <span style={{color: CELESTE}}>RANCE</span>
           </Cap>
-          <Cap desde={T.titulo + 1.0} hasta={T.dur + 1} style={{fontSize: 40, fontWeight: 700, opacity: 0.6, letterSpacing: 6}}>LA SERIE</Cap>
+          <Cap desde={T.nombre + 0.4} hasta={T.dur + 1} style={{fontSize: 40, fontWeight: 700, opacity: 0.6, letterSpacing: 6}}>LA SERIE</Cap>
           <div style={{marginTop: 150}}>
             <Cap desde={T.pregunta} hasta={T.dur + 1} golpe style={{fontSize: 110, fontWeight: 900, letterSpacing: -3}}>¿Firmarías?</Cap>
           </div>

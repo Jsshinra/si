@@ -361,7 +361,7 @@ export const Hoyo: React.FC = () => {
             )}
           {/* círculo alrededor del hueco */}
           <div style={{position: 'absolute', left: 0, top: Y(48)}}>
-            <Rodear desde={T.celda + 1.2} x={HUECO[0] - 40} y={PISO - 60} w={HUECO[1] - HUECO[0] + 80} h={150} />
+            <Rodear desde={T.celda + 1.2} hasta={T.arriba + 0.6} x={HUECO[0] - 40} y={PISO - 60} w={HUECO[1] - HUECO[0] + 80} h={150} />
           </div>
         </div>
       </Hervir>

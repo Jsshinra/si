@@ -170,15 +170,16 @@ export const Mano: React.FC<{desde: number; hasta: number; children: React.React
 };
 
 /** Círculo dibujado a mano que se traza alrededor de algo */
-export const Rodear: React.FC<{desde: number; x: number; y: number; w: number; h: number; color?: string; dur?: number}> = ({desde, x, y, w, h, color = '#a3271d', dur = 0.5}) => {
+export const Rodear: React.FC<{desde: number; hasta?: number; x: number; y: number; w: number; h: number; color?: string; dur?: number}> = ({desde, hasta = Infinity, x, y, w, h, color = '#a3271d', dur = 0.5}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const k = interpolate(frame / fps, [desde, desde + dur], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  if (k <= 0) return null;
+  const out = interpolate(frame / fps, [hasta - 0.25, hasta], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  if (k <= 0 || out <= 0) return null;
   const L = 2000;
   const d = `M ${x + w * 0.05} ${y + h * 0.2} C ${x + w * 0.2} ${y - h * 0.08}, ${x + w * 0.9} ${y - h * 0.1}, ${x + w * 1.02} ${y + h * 0.45} C ${x + w * 1.08} ${y + h * 0.95}, ${x + w * 0.2} ${y + h * 1.12}, ${x - w * 0.02} ${y + h * 0.6} C ${x - w * 0.08} ${y + h * 0.3}, ${x + w * 0.25} ${y + h * 0.02}, ${x + w * 0.4} ${y - h * 0.02}`;
   return (
-    <svg width={1080} height={1920} style={{position: 'absolute', inset: 0, overflow: 'visible', pointerEvents: 'none'}}>
+    <svg width={1080} height={1920} style={{position: 'absolute', inset: 0, overflow: 'visible', pointerEvents: 'none', opacity: out}}>
       <path d={d} fill="none" stroke={color} strokeWidth={7} strokeLinecap="round" strokeDasharray={L} strokeDashoffset={L * (1 - k)} />
     </svg>
   );

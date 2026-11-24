@@ -203,7 +203,7 @@ export const TarjetaTitulo: React.FC<{desde: number; antetitulo: string; titulo:
       <div style={{background: '#f6efdd', padding: '54px 56px 60px', boxShadow: '6px 10px 0 rgba(43,38,34,0.25)', position: 'relative', border: `3px solid ${TINTA}`}}>
         <div style={{position: 'absolute', left: 34, right: 34, top: 120, height: 3, background: 'rgba(163,39,29,0.35)'}} />
         <div style={{fontFamily: MAQUINA, fontSize: 40, color: SEPIA, minHeight: 54}}>{tipear(antetitulo, desde + 0.5, 22)}</div>
-        <div style={{fontFamily: MAQUINA, fontSize: 132, color: TINTA, lineHeight: 1.05, marginTop: 34, minHeight: 140, letterSpacing: 2}}>{tipear(titulo, tT, 10)}</div>
+        <div style={{fontFamily: MAQUINA, fontSize: titulo.length > 9 ? 92 : 132, color: TINTA, lineHeight: 1.05, marginTop: 34, minHeight: titulo.length > 9 ? 200 : 140, letterSpacing: 2}}>{tipear(titulo, tT, 10)}</div>
         <div style={{fontFamily: MAQUINA, fontSize: 40, color: TINTA, marginTop: 22, minHeight: 54}}>{tipear(detalle, tD, 26)}</div>
         {t >= tS && sello && (
           <div style={{position: 'absolute', right: 36, bottom: -40, fontFamily: MAQUINA, fontSize: 56, color: '#a3271d', border: '6px solid #a3271d', padding: '4px 22px', transform: `rotate(-12deg) scale(${interpolate(pS, [0, 1], [2.6, 1])})`, opacity: 0.85 * Math.min(1, pS * 2), mixBlendMode: 'multiply'}}>

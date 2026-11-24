@@ -1,0 +1,18 @@
+{
+  "dur": 82,
+  "gancho": 0.2,
+  "reloj": 3.6,
+  "reglas": 7.0,
+  "r1": 8.6, "para": 12.6,
+  "r2": 15.0, "unAnio": 17.4, "cero": 19.6,
+  "r3": 22.5, "paga": 24.6, "cafe": 27.0, "colectivo": 29.0,
+  "divide": 31.5,
+  "ricos": 33.5,
+  "pobres": 39.5,
+  "suben": 45.0,
+  "pocos": 50.5,
+  "leccion": 57.0, "noVes": 63.0,
+  "titulo": 67.5,
+  "pregunta": 71.5,
+  "comenta": 77.0
+}
